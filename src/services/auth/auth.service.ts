@@ -5,9 +5,9 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
 
-const API_URL = 'http://localhost:8000';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
+const CONFIG_KEY = 'auth_config';
 
 // Initialize WebBrowser for Auth0
 WebBrowser.maybeCompleteAuthSession();
@@ -15,6 +15,7 @@ WebBrowser.maybeCompleteAuthSession();
 interface Auth0Config {
   domain: string;
   clientId: string;
+  apiUrl: string;
 }
 
 interface UserProfile {
@@ -39,9 +40,29 @@ export class AuthService {
     try {
       if (this.config) return this.config;
 
-      const response = await axios.get<Auth0Config>(`${API_URL}/api/auth/config`);
-      this.config = response.data;
-      return this.config;
+      // Try to get cached config first
+      const cachedConfig = await SecureStore.getItemAsync(CONFIG_KEY);
+      if (cachedConfig) {
+        const parsedConfig = JSON.parse(cachedConfig) as Auth0Config;
+        this.config = parsedConfig;
+        return parsedConfig;
+      }
+
+      // If no cached config, fetch from backend
+      // Using a default development URL that will be immediately replaced
+      const devUrl = 'http://localhost:8000';
+      const response = await axios.get<Auth0Config>(`${devUrl}/api/auth/config`);
+      const config = response.data;
+
+      // Validate config structure
+      if (!config.domain || !config.clientId || !config.apiUrl) {
+        throw new Error('Invalid configuration received from server');
+      }
+
+      this.config = config;
+      // Cache the config
+      await SecureStore.setItemAsync(CONFIG_KEY, JSON.stringify(config));
+      return config;
     } catch (error) {
       console.error('Failed to fetch Auth0 configuration:', error);
       throw new Error('Authentication configuration unavailable');
@@ -112,7 +133,7 @@ export class AuthService {
       if (!token) return null;
 
       const config = await this.getAuth0Config();
-      const response = await axios.get<UserProfile>(`https://${config.domain}/userinfo`, {
+      const response = await axios.get<UserProfile>(`${config.apiUrl}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -140,4 +161,4 @@ export class AuthService {
   }
 }
 
-export type { UserProfile };
+export type { UserProfile, Auth0Config };
