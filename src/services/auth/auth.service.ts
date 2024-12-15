@@ -23,6 +23,8 @@ interface UserProfile {
   email: string;
   name?: string;
   picture?: string;
+  email_verified: boolean;
+  updated_at: string;
 }
 
 type AuthSessionResultType = AuthSession.AuthSessionResult & {
@@ -109,6 +111,17 @@ export class AuthService {
 
   static async logout(): Promise<void> {
     try {
+      const config = await this.getAuth0Config();
+      const token = await this.getToken();
+
+      if (token) {
+        // Call backend logout endpoint
+        await axios.post(`${config.apiUrl}/api/auth/logout`, null, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+
+      // Clear local storage
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       await SecureStore.deleteItemAsync(USER_KEY);
       this.userProfile = null;
