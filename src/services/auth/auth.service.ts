@@ -1,10 +1,13 @@
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
 
 const API_URL = 'http://localhost:8000';
+const TOKEN_KEY = 'auth_token';
+const USER_KEY = 'user_data';
 
 // Initialize WebBrowser for Auth0
 WebBrowser.maybeCompleteAuthSession();
@@ -12,6 +15,13 @@ WebBrowser.maybeCompleteAuthSession();
 interface Auth0Config {
   domain: string;
   clientId: string;
+}
+
+interface UserProfile {
+  sub: string;
+  email: string;
+  name?: string;
+  picture?: string;
 }
 
 type AuthSessionResultType = AuthSession.AuthSessionResult & {
@@ -23,6 +33,7 @@ type AuthSessionResultType = AuthSession.AuthSessionResult & {
 
 export class AuthService {
   private static config: Auth0Config | null = null;
+  private static userProfile: UserProfile | null = null;
 
   static async getAuth0Config(): Promise<Auth0Config> {
     try {
@@ -41,7 +52,6 @@ export class AuthService {
     try {
       const config = await this.getAuth0Config();
 
-      // Create redirect URI based on platform
       const scheme = 'life-portrait';
       const redirectUri = AuthSession.makeRedirectUri({
         scheme,
@@ -76,7 +86,58 @@ export class AuthService {
     }
   }
 
+  static async logout(): Promise<void> {
+    try {
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await SecureStore.deleteItemAsync(USER_KEY);
+      this.userProfile = null;
+      router.replace('/auth/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
+  }
+
+  static async getUserProfile(): Promise<UserProfile | null> {
+    try {
+      if (this.userProfile) return this.userProfile;
+
+      const storedProfile = await SecureStore.getItemAsync(USER_KEY);
+      if (storedProfile) {
+        this.userProfile = JSON.parse(storedProfile);
+        return this.userProfile;
+      }
+
+      const token = await this.getToken();
+      if (!token) return null;
+
+      const config = await this.getAuth0Config();
+      const response = await axios.get<UserProfile>(`https://${config.domain}/userinfo`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      this.userProfile = response.data;
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(this.userProfile));
+      return this.userProfile;
+    } catch (error) {
+      console.error('Failed to get user profile:', error);
+      return null;
+    }
+  }
+
   private static async handleAuthenticationSuccess(accessToken: string): Promise<void> {
-    console.log('Authentication successful');
+    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+    await this.getUserProfile(); // Fetch and cache user profile
+  }
+
+  private static async getToken(): Promise<string | null> {
+    try {
+      return await SecureStore.getItemAsync(TOKEN_KEY);
+    } catch (error) {
+      console.error('Failed to get token:', error);
+      return null;
+    }
   }
 }
+
+export type { UserProfile };
