@@ -1,43 +1,22 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Alert } from 'react-native';
 import { Stack } from 'expo-router';
 import { ThemedText } from '../../components/ThemedText';
-import { ThemedView } from '../../components/ThemedView';
+import { ThemedButton } from '../../components/ThemedButton';
 import { Colors } from '../../constants/Colors';
-import { AuthService } from '../../src/services/auth/auth.service';
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 32,
-    marginBottom: 30,
-    fontWeight: 'bold',
-  },
-  button: {
-    width: '100%',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
+import { useAuth } from '../../src/hooks/useAuth';
+import { useColorScheme } from 'react-native';
 
 export default function LoginScreen() {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { login } = useAuth();
+  const colorScheme = useColorScheme() ?? 'light';
+  const colors = Colors[colorScheme];
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAuth0Login = async () => {
     try {
       setIsLoading(true);
-      await AuthService.login();
+      await login();
     } catch (error) {
       console.error('Failed to login:', error);
       Alert.alert(
@@ -51,30 +30,52 @@ export default function LoginScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
         options={{
           title: 'Welcome',
-          headerStyle: {
-            backgroundColor: Colors.light.primary,
-          },
-          headerTintColor: Colors.light.accent,
+          headerShown: false,
         }}
       />
 
-      <ThemedText style={styles.title} lightColor={Colors.light.primary}>
-        Welcome Back
-      </ThemedText>
-
-      <TouchableOpacity
-        onPress={handleAuth0Login}
-        style={[styles.button, { backgroundColor: Colors.light.primary }, isLoading && { opacity: 0.7 }]}
-        disabled={isLoading}
-      >
-        <ThemedText style={styles.buttonText} lightColor={Colors.light.accent}>
-          {isLoading ? 'Logging in...' : 'Continue with Auth0'}
+      <View style={styles.content}>
+        <ThemedText style={styles.title} type="title">
+          Welcome to Life Portrait
         </ThemedText>
-      </TouchableOpacity>
-    </ThemedView>
+        <ThemedText style={styles.subtitle} type="subtitle">
+          Sign in to continue your journey of personal growth
+        </ThemedText>
+
+        <ThemedButton
+          title="Sign in with Auth0"
+          onPress={handleAuth0Login}
+          loading={isLoading}
+          variant="primary"
+        />
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  content: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  title: {
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  subtitle: {
+    marginBottom: 32,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+});
