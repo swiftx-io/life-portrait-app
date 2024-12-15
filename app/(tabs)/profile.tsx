@@ -51,27 +51,29 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={{
-      flex: 1,
-      padding: 20,
-      backgroundColor: colors.accent,
-    }}>
+    <View
+      style={{
+        flex: 1,
+        padding: 20,
+        backgroundColor: colors.accent,
+      }}
+    >
       <View style={{ alignItems: 'center', marginBottom: 30 }}>
         {profile?.picture && (
-          <View style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            backgroundColor: colors.secondary,
-            marginBottom: 16,
-            overflow: 'hidden'
-          }}>
+          <View
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+              backgroundColor: colors.secondary,
+              marginBottom: 16,
+              overflow: 'hidden',
+            }}
+          >
             {/* Avatar implementation will be added later */}
           </View>
         )}
-        <ThemedText type="title">
-          {profile?.name || 'User Profile'}
-        </ThemedText>
+        <ThemedText type="title">{profile?.name || 'User Profile'}</ThemedText>
         <ThemedText type="subtitle" style={{ marginTop: 8 }}>
           {profile?.email || 'No email available'}
         </ThemedText>

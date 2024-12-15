@@ -19,24 +19,22 @@ export function ThemedButton({
   loading = false,
   variant = 'primary',
   disabled = false,
-  style
+  style,
 }: ThemedButtonProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   const buttonStyle = [
     styles.button,
-    variant === 'primary' ? { backgroundColor: colors.primary } : { backgroundColor: colors.secondary },
+    variant === 'primary'
+      ? { backgroundColor: colors.primary }
+      : { backgroundColor: colors.secondary },
     disabled && styles.disabled,
-    style
+    style,
   ];
 
   return (
-    <TouchableOpacity
-      style={buttonStyle}
-      onPress={onPress}
-      disabled={disabled || loading}
-    >
+    <TouchableOpacity style={buttonStyle} onPress={onPress} disabled={disabled || loading}>
       {loading ? (
         <ActivityIndicator color={colors.accent} />
       ) : (

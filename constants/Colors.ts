@@ -4,10 +4,10 @@
  */
 
 // Brand Colors
-const terracotta = '#E2725B';  // Primary: warmth, authenticity
+const terracotta = '#E2725B'; // Primary: warmth, authenticity
 const ochreYellow = '#CC7722'; // Secondary: wisdom, optimism
 const creamyWhite = '#F5F5DC'; // Accent: soft, neutral
-const darkAccent = '#2A2A22';  // Dark mode accent: darker variant of creamyWhite
+const darkAccent = '#2A2A22'; // Dark mode accent: darker variant of creamyWhite
 
 export const Colors = {
   light: {

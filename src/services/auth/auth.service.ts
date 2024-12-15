@@ -33,7 +33,7 @@ const storage = {
       return;
     }
     return SecureStore.deleteItemAsync(key);
-  }
+  },
 };
 
 interface Auth0Config {
@@ -140,7 +140,7 @@ export class AuthService {
       if (token) {
         // Call backend logout endpoint
         await axios.post(`${config.apiUrl}/api/auth/logout`, null, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
 

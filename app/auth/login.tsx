@@ -19,11 +19,7 @@ export default function LoginScreen() {
       await login();
     } catch (error) {
       console.error('Failed to login:', error);
-      Alert.alert(
-        'Login Failed',
-        'Unable to log in. Please try again later.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Login Failed', 'Unable to log in. Please try again later.', [{ text: 'OK' }]);
     } finally {
       setIsLoading(false);
     }

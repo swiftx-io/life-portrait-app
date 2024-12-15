@@ -18,10 +18,7 @@ export default function RegisterScreen() {
       setLoading(true);
       await login(); // Auth0 handles registration through the same flow
     } catch (error) {
-      Alert.alert(
-        'Registration Failed',
-        'Unable to complete registration. Please try again.'
-      );
+      Alert.alert('Registration Failed', 'Unable to complete registration. Please try again.');
       console.error('Registration error:', error);
     } finally {
       setLoading(false);
@@ -29,24 +26,20 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.accent,
-      padding: 20
-    }}>
-      <ThemedText
-        type="title"
-        style={{ marginBottom: 20 }}
-      >
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.accent,
+        padding: 20,
+      }}
+    >
+      <ThemedText type="title" style={{ marginBottom: 20 }}>
         Create Your Account
       </ThemedText>
 
-      <ThemedText
-        type="subtitle"
-        style={{ marginBottom: 40, textAlign: 'center' }}
-      >
+      <ThemedText type="subtitle" style={{ marginBottom: 40, textAlign: 'center' }}>
         Join Life Portrait to start your journey of self-discovery and growth
       </ThemedText>
 
