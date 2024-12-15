@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { useColorScheme } from 'react-native';
 import { ThemedText } from './ThemedText';
@@ -10,6 +10,7 @@ interface ThemedButtonProps {
   loading?: boolean;
   variant?: 'primary' | 'secondary';
   disabled?: boolean;
+  style?: ViewStyle;
 }
 
 export function ThemedButton({
@@ -17,7 +18,8 @@ export function ThemedButton({
   title,
   loading = false,
   variant = 'primary',
-  disabled = false
+  disabled = false,
+  style
 }: ThemedButtonProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -25,7 +27,8 @@ export function ThemedButton({
   const buttonStyle = [
     styles.button,
     variant === 'primary' ? { backgroundColor: colors.primary } : { backgroundColor: colors.secondary },
-    disabled && styles.disabled
+    disabled && styles.disabled,
+    style
   ];
 
   return (
