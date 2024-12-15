@@ -1,10 +1,11 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import 'react-native-reanimated';
+import { AuthService } from '../src/services/auth/auth.service';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -19,9 +20,22 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
+    const init = async () => {
+      try {
+        if (loaded) {
+          await SplashScreen.hideAsync();
+          const token = await AuthService.getToken();
+          if (!token) {
+            router.replace('/auth/login');
+          }
+        }
+      } catch (error) {
+        console.error('Initialization failed:', error);
+        router.replace('/auth/login');
+      }
+    };
+
+    init();
   }, [loaded]);
 
   if (!loaded) {
@@ -32,7 +46,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

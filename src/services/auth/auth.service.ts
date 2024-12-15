@@ -159,18 +159,18 @@ export class AuthService {
     }
   }
 
-  private static async handleAuthenticationSuccess(accessToken: string): Promise<void> {
-    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
-    await this.getUserProfile(); // Fetch and cache user profile
-  }
-
-  private static async getToken(): Promise<string | null> {
+  static async getToken(): Promise<string | null> {
     try {
       return await SecureStore.getItemAsync(TOKEN_KEY);
     } catch (error) {
       console.error('Failed to get token:', error);
       return null;
     }
+  }
+
+  private static async handleAuthenticationSuccess(accessToken: string): Promise<void> {
+    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+    await this.getUserProfile(); // Fetch and cache user profile
   }
 }
 
