@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Stack } from 'expo-router';
 import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
@@ -32,11 +32,21 @@ const styles = StyleSheet.create({
 });
 
 export default function LoginScreen() {
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const handleAuth0Login = async () => {
     try {
+      setIsLoading(true);
       await AuthService.login();
     } catch (error) {
       console.error('Failed to login:', error);
+      Alert.alert(
+        'Login Failed',
+        'Unable to log in. Please try again later.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,9 +68,11 @@ export default function LoginScreen() {
 
       <TouchableOpacity
         onPress={handleAuth0Login}
-        style={[styles.button, { backgroundColor: Colors.light.primary }]}>
+        style={[styles.button, { backgroundColor: Colors.light.primary }, isLoading && { opacity: 0.7 }]}
+        disabled={isLoading}
+      >
         <ThemedText style={styles.buttonText} lightColor={Colors.light.accent}>
-          Continue with Auth0
+          {isLoading ? 'Logging in...' : 'Continue with Auth0'}
         </ThemedText>
       </TouchableOpacity>
     </ThemedView>
