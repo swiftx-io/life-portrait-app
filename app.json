@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "life-portrait-app",
-    "slug": "life-portrait-app",
+    "name": "life-portrait",
+    "slug": "life-portrait",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
