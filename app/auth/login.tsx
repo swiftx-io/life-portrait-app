@@ -3,6 +3,8 @@ import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
+import { Colors } from '../../constants/Colors';
+import { AuthService } from '../../src/services/auth/auth.service';
 
 const styles = StyleSheet.create({
   container: {
@@ -19,13 +21,11 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     padding: 15,
-    backgroundColor: '#E2725B', // Terracotta - Primary Color
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 16,
   },
   buttonText: {
-    color: '#F5F5DC', // Creamy White - Accent Color
     fontSize: 18,
     fontWeight: '600',
   },
@@ -33,28 +33,35 @@ const styles = StyleSheet.create({
 
 export default function LoginScreen() {
   const handleAuth0Login = async () => {
-    // Auth0 login will be implemented in next step
-    // For now, we're just setting up the UI structure
+    try {
+      await AuthService.login();
+    } catch (error) {
+      console.error('Failed to login:', error);
+    }
   };
 
   return (
-    <ThemedView style={styles.container} lightColor="#F5F5DC">
+    <ThemedView style={styles.container}>
       <Stack.Screen
         options={{
           title: 'Welcome',
           headerStyle: {
-            backgroundColor: '#E2725B',
+            backgroundColor: Colors.light.primary,
           },
-          headerTintColor: '#F5F5DC',
+          headerTintColor: Colors.light.accent,
         }}
       />
 
-      <ThemedText style={styles.title} lightColor="#E2725B">
+      <ThemedText style={styles.title} lightColor={Colors.light.primary}>
         Welcome Back
       </ThemedText>
 
-      <TouchableOpacity onPress={handleAuth0Login} style={styles.button}>
-        <ThemedText style={styles.buttonText}>Continue with Auth0</ThemedText>
+      <TouchableOpacity
+        onPress={handleAuth0Login}
+        style={[styles.button, { backgroundColor: Colors.light.primary }]}>
+        <ThemedText style={styles.buttonText} lightColor={Colors.light.accent}>
+          Continue with Auth0
+        </ThemedText>
       </TouchableOpacity>
     </ThemedView>
   );
