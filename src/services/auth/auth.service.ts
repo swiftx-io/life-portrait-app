@@ -12,6 +12,30 @@ const CONFIG_KEY = 'auth_config';
 // Initialize WebBrowser for Auth0
 WebBrowser.maybeCompleteAuthSession();
 
+// Storage adapter for web/mobile platforms
+const storage = {
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      return localStorage.getItem(key);
+    }
+    return SecureStore.getItemAsync(key);
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.setItem(key, value);
+      return;
+    }
+    return SecureStore.setItemAsync(key, value);
+  },
+  async removeItem(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem(key);
+      return;
+    }
+    return SecureStore.deleteItemAsync(key);
+  }
+};
+
 interface Auth0Config {
   domain: string;
   clientId: string;
@@ -43,7 +67,7 @@ export class AuthService {
       if (this.config) return this.config;
 
       // Try to get cached config first
-      const cachedConfig = await SecureStore.getItemAsync(CONFIG_KEY);
+      const cachedConfig = await storage.getItem(CONFIG_KEY);
       if (cachedConfig) {
         const parsedConfig = JSON.parse(cachedConfig) as Auth0Config;
         this.config = parsedConfig;
@@ -51,7 +75,6 @@ export class AuthService {
       }
 
       // If no cached config, fetch from backend
-      // Using a default development URL that will be immediately replaced
       const devUrl = 'http://localhost:8000';
       const response = await axios.get<Auth0Config>(`${devUrl}/api/auth/config`);
       const config = response.data;
@@ -63,7 +86,7 @@ export class AuthService {
 
       this.config = config;
       // Cache the config
-      await SecureStore.setItemAsync(CONFIG_KEY, JSON.stringify(config));
+      await storage.setItem(CONFIG_KEY, JSON.stringify(config));
       return config;
     } catch (error) {
       console.error('Failed to fetch Auth0 configuration:', error);
@@ -122,8 +145,8 @@ export class AuthService {
       }
 
       // Clear local storage
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_KEY);
+      await storage.removeItem(TOKEN_KEY);
+      await storage.removeItem(USER_KEY);
       this.userProfile = null;
       router.replace('/auth/login');
     } catch (error) {
@@ -136,7 +159,7 @@ export class AuthService {
     try {
       if (this.userProfile) return this.userProfile;
 
-      const storedProfile = await SecureStore.getItemAsync(USER_KEY);
+      const storedProfile = await storage.getItem(USER_KEY);
       if (storedProfile) {
         this.userProfile = JSON.parse(storedProfile);
         return this.userProfile;
@@ -151,7 +174,7 @@ export class AuthService {
       });
 
       this.userProfile = response.data;
-      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(this.userProfile));
+      await storage.setItem(USER_KEY, JSON.stringify(this.userProfile));
       return this.userProfile;
     } catch (error) {
       console.error('Failed to get user profile:', error);
@@ -161,7 +184,7 @@ export class AuthService {
 
   static async getToken(): Promise<string | null> {
     try {
-      return await SecureStore.getItemAsync(TOKEN_KEY);
+      return await storage.getItem(TOKEN_KEY);
     } catch (error) {
       console.error('Failed to get token:', error);
       return null;
@@ -169,7 +192,7 @@ export class AuthService {
   }
 
   private static async handleAuthenticationSuccess(accessToken: string): Promise<void> {
-    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+    await storage.setItem(TOKEN_KEY, accessToken);
     await this.getUserProfile(); // Fetch and cache user profile
   }
 }
